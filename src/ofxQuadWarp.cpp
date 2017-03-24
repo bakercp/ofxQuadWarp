@@ -4,6 +4,7 @@
 //
 
 #include "ofxQuadWarp.h"
+#include "ofxXmlPoco.h"
 
 ofxQuadWarp::ofxQuadWarp() {
     anchorSize = 10;
@@ -411,7 +412,7 @@ bool ofxQuadWarp::isShowing() {
 
 //----------------------------------------------------- save / load.
 void ofxQuadWarp::save(const string& path) {
-    ofXml xml;
+    ofxXmlPoco xml;
     xml.addChild("quadwarp");
     xml.setTo("quadwarp");
     xml.addChild("src");
@@ -440,7 +441,7 @@ void ofxQuadWarp::save(const string& path) {
 }
 
 void ofxQuadWarp::load(const string& path) {
-    ofXml xml;
+    ofxXmlPoco xml;
     bool bOk = xml.load(path);
     if(bOk == false) {
         return;
