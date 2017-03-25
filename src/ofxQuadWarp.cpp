@@ -8,16 +8,22 @@
 #include "opencv2/calib3d/calib3d_c.h"
 
 
-ofxQuadWarp::ofxQuadWarp() {
-    anchorSize = 10;
-    anchorSizeHalf = anchorSize * 0.5;
-    selectedCornerIndex = -1;
-    highlightCornerIndex = -1;
-    
-    bMouseEnabled = false;
-    bKeyboardShortcuts = false;
-    bShow = false;
+ofxQuadWarp::ofxQuadWarp():
+    exitListener(ofEvents().exit.newListener(this, &ofxQuadWarp::exit)),
+    anchorSize(10),
+    anchorSizeHalf(anchorSize * 0.5),
+    selectedCornerIndex(-1),
+    highlightCornerIndex(-1),
+    bMouseEnabled(false),
+    bKeyboardShortcuts(false),
+    bShow(false)
+{
+
+//    updateListener(ofEvents().update.newListener(this, &ofxQuadWarp::update, OF_EVENT_ORDER_AFTER_APP)),
+
+
 }
+
 
 ofxQuadWarp::~ofxQuadWarp() {
     disableMouseControls();
@@ -50,6 +56,19 @@ void ofxQuadWarp::enable() {    // DEPRECATED.
 void ofxQuadWarp::disable() {   // DEPRECATED.
     disableMouseControls();
 }
+
+
+void ofxQuadWarp::update(ofEventArgs& args)
+{
+    update();
+}
+
+
+void ofxQuadWarp::exit(ofEventArgs& args)
+{
+    save();
+}
+
 
 void ofxQuadWarp::enableMouseControls() {
     if(bMouseEnabled == true) {
@@ -315,43 +334,77 @@ void ofxQuadWarp::keyPressed(ofKeyEventArgs& keyArgs) {
     if(bShow == false) {
         return;
     }
-    
-    switch (keyArgs.key) {
-        case '1':
-            selectedCornerIndex = 0;
-            break;
-        case '2':
-            selectedCornerIndex = 1;
-            break;
-        case '3':
-            selectedCornerIndex = 2;
-            break;
-        case '4':
-            selectedCornerIndex = 3;
-            break;
-        default:
-            break;
+
+    if (keyArgs.key == '[')
+    {
+        nudgeAmount -= 1;
+        if (nudgeAmount < 0.3) nudgeAmount = 0.3;
+        return;
+    }
+    else if (keyArgs.key == ']')
+    {
+        nudgeAmount += 1;
+        if (nudgeAmount > 25) nudgeAmount = 25;
+        return;
+    }
+
+
+    if (keyArgs.key >= '1' && keyArgs.key <= '4')
+    {
+        switch (keyArgs.key) {
+            case '1':
+                selectedCornerIndex = 0;
+                break;
+            case '2':
+                selectedCornerIndex = 1;
+                break;
+            case '3':
+                selectedCornerIndex = 2;
+                break;
+            case '4':
+                selectedCornerIndex = 3;
+                break;
+            default:
+                break;
+        }
     }
     
     if(selectedCornerIndex < 0 || selectedCornerIndex > 3) {
         return;
     }
     
-    float nudgeAmount = 0.3;
-    ofPoint & selectedPoint = dstPoints[selectedCornerIndex];
-    
+    ofPoint & selectedDestPoint = dstPoints[selectedCornerIndex];
+    ofPoint & selectedSrcPoint = srcPoints[selectedCornerIndex];
+
     switch (keyArgs.key) {
         case OF_KEY_LEFT:
-            selectedPoint.x -= nudgeAmount;
+            selectedDestPoint.x -= nudgeAmount;
             break;
         case OF_KEY_RIGHT:
-            selectedPoint.x += nudgeAmount;
+            selectedDestPoint.x += nudgeAmount;
             break;
         case OF_KEY_UP:
-            selectedPoint.y -= nudgeAmount;
+            selectedDestPoint.y -= nudgeAmount;
             break;
         case OF_KEY_DOWN:
-            selectedPoint.y += nudgeAmount;
+            selectedDestPoint.y += nudgeAmount;
+            break;
+        default:
+            break;
+    }
+
+    switch (keyArgs.key) {
+        case 'd':
+            selectedSrcPoint.x -= nudgeAmount;
+            break;
+        case 'a':
+            selectedSrcPoint.x += nudgeAmount;
+            break;
+        case 's':
+            selectedSrcPoint.y -= nudgeAmount;
+            break;
+        case 'w':
+            selectedSrcPoint.y += nudgeAmount;
             break;
         default:
             break;

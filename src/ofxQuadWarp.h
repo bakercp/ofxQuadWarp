@@ -22,10 +22,10 @@ public:
     void setAnchorSize(float value);
     
     void setSourceRect(const ofRectangle& rect);
-    void setSourcePoints(const vector<ofPoint>& points);
+    void setSourcePoints(const std::vector<ofPoint>& points);
     ofPoint* getSourcePoints();
     void setTargetRect(const ofRectangle& rect);
-    void setTargetPoints(const vector<ofPoint>& points);
+    void setTargetPoints(const std::vector<ofPoint>& points);
     ofPoint* getTargetPoints();
     
     OF_DEPRECATED_MSG("Use enableMouseControls() and enableKeyboardShortcuts() instead.", void enable());
@@ -44,7 +44,7 @@ public:
     ofMatrix4x4 getMatrixInverse() const;
     ofMatrix4x4 getMatrix(const ofPoint * srcPoints, const ofPoint * dstPoints) const;
     
-    void setCorners(const vector<ofPoint>& corners);
+    void setCorners(const std::vector<ofPoint>& corners);
     void setCorner(const ofPoint& p, int cornerIndex);
     void setTopLeftCornerPosition(const ofPoint& p);
     void setTopRightCornerPosition(const ofPoint& p);
@@ -71,20 +71,26 @@ public:
     ofPoint dstPoints[4];
     
 protected:
+    void update(ofEventArgs& args);
+    void exit(ofEventArgs& args);
 
     void onMouseMoved(ofMouseEventArgs & mouseArgs);
     void onMousePressed(ofMouseEventArgs & mouseArgs);
     void onMouseDragged(ofMouseEventArgs & mouseArgs);
     void onMouseReleased(ofMouseEventArgs & mouseArgs);
     void keyPressed(ofKeyEventArgs & keyArgs);
-    
+
+    ofEventListener exitListener;
+    ofEventListener updateListener;
+
     ofPoint position;
     
 	float anchorSize;
     float anchorSizeHalf;
     int selectedCornerIndex;
     int highlightCornerIndex;
-    
+    float nudgeAmount = 0.3;
+
     bool bMouseEnabled;
     bool bKeyboardShortcuts;
     bool bShow;
