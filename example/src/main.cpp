@@ -13,8 +13,7 @@ int main()
 
     settings.multiMonitorFullScreen = true;
     settings.resizable = false;
-    settings.width = screenWidth * numScreens;
-    settings.height = screenHeight;
+    settings.setSize(screenWidth * numScreens, screenHeight);
     settings.windowMode = OF_FULLSCREEN;
 
     auto window = ofCreateWindow(settings);
