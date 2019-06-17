@@ -6,16 +6,16 @@
 //
 #pragma once
 
+
 #include "ofMain.h"
 #include "ofxOpenCv.h"
+
 
 class ofxQuadWarp 
 {
 public: 
-    
-     ofxQuadWarp();
-    ~ofxQuadWarp();
-    
+    ofxQuadWarp();
+
     void setup();
     
     void setPosition(float x, float y);
@@ -42,7 +42,8 @@ public:
     
     ofMatrix4x4 getMatrix() const;
     ofMatrix4x4 getMatrixInverse() const;
-    ofMatrix4x4 getMatrix(const ofPoint * srcPoints, const ofPoint * dstPoints) const;
+    ofMatrix4x4 getMatrix(const ofPoint* srcPoints,
+                          const ofPoint* dstPoints) const;
     
     void setCorners(const std::vector<ofPoint>& corners);
     void setCorner(const ofPoint& p, int cornerIndex);
@@ -74,14 +75,20 @@ protected:
     void update(ofEventArgs& args);
     void exit(ofEventArgs& args);
 
-    void onMouseMoved(ofMouseEventArgs & mouseArgs);
-    void onMousePressed(ofMouseEventArgs & mouseArgs);
-    void onMouseDragged(ofMouseEventArgs & mouseArgs);
+    void onMouseMoved(ofMouseEventArgs& mouseArgs);
+    void onMousePressed(ofMouseEventArgs& mouseArgs);
+    void onMouseDragged(ofMouseEventArgs& mouseArgs);
     void onMouseReleased(ofMouseEventArgs & mouseArgs);
     void keyPressed(ofKeyEventArgs & keyArgs);
 
     ofEventListener exitListener;
-    ofEventListener updateListener;
+
+    ofEventListener mouseMovedListener;
+    ofEventListener mousePressedListener;
+    ofEventListener mouseDraggedListener;
+    ofEventListener mouseReleasedListener;
+
+    ofEventListener keyPressedListener;
 
     ofPoint position;
     

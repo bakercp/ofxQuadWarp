@@ -18,17 +18,8 @@ ofxQuadWarp::ofxQuadWarp():
     bKeyboardShortcuts(false),
     bShow(false)
 {
-
-//    updateListener(ofEvents().update.newListener(this, &ofxQuadWarp::update, OF_EVENT_ORDER_AFTER_APP)),
-
-
 }
 
-
-ofxQuadWarp::~ofxQuadWarp() {
-    disableMouseControls();
-    disableKeyboardShortcuts();
-}
 
 //----------------------------------------------------- setup.
 void ofxQuadWarp::setup() {
@@ -37,23 +28,28 @@ void ofxQuadWarp::setup() {
     show();
 }
 
-//----------------------------------------------------- setters.
-void ofxQuadWarp::setPosition(float x, float y) {
+
+void ofxQuadWarp::setPosition(float x, float y)
+{
     position.x = x;
     position.y = y;
 }
 
-void ofxQuadWarp::setAnchorSize(float value) {
+
+void ofxQuadWarp::setAnchorSize(float value)
+{
     anchorSize = value;
     anchorSizeHalf = anchorSize * 0.5;
 }
 
-//----------------------------------------------------- enable / disable.
-void ofxQuadWarp::enable() {    // DEPRECATED.
+
+void ofxQuadWarp::enable()
+{
     enableMouseControls();
 }
 
-void ofxQuadWarp::disable() {   // DEPRECATED.
+void ofxQuadWarp::disable()
+{
     disableMouseControls();
 }
 
@@ -70,101 +66,88 @@ void ofxQuadWarp::exit(ofEventArgs& args)
 }
 
 
-void ofxQuadWarp::enableMouseControls() {
-    if(bMouseEnabled == true) {
-        return;
-    }
+void ofxQuadWarp::enableMouseControls()
+{
     bMouseEnabled = true;
-    ofAddListener(ofEvents().mouseMoved, this, &ofxQuadWarp::onMouseMoved);
-    ofAddListener(ofEvents().mousePressed, this, &ofxQuadWarp::onMousePressed);
-    ofAddListener(ofEvents().mouseDragged, this, &ofxQuadWarp::onMouseDragged);
-    ofAddListener(ofEvents().mouseReleased, this, &ofxQuadWarp::onMouseReleased);
+    mouseMovedListener = ofEvents().mouseMoved.newListener(this, &ofxQuadWarp::onMouseMoved);
+    mousePressedListener = ofEvents().mousePressed.newListener(this, &ofxQuadWarp::onMousePressed);;
+    mouseDraggedListener = ofEvents().mouseDragged.newListener(this, &ofxQuadWarp::onMouseDragged);;
+    mouseReleasedListener = ofEvents().mouseReleased.newListener(this, &ofxQuadWarp::onMouseReleased);;
 }
 
-void ofxQuadWarp::disableMouseControls() {
-    if(bMouseEnabled == false) {
-        return;
-    }
+void ofxQuadWarp::disableMouseControls()
+{
     bMouseEnabled = false;
-    try {
-        ofRemoveListener(ofEvents().mouseMoved, this, &ofxQuadWarp::onMouseMoved);
-        ofRemoveListener(ofEvents().mousePressed, this, &ofxQuadWarp::onMousePressed);
-        ofRemoveListener(ofEvents().mouseDragged, this, &ofxQuadWarp::onMouseDragged);
-        ofRemoveListener(ofEvents().mouseReleased, this, &ofxQuadWarp::onMouseReleased);
-    }
-    catch(Poco::SystemException) {
-        return;
-    }
+    mouseMovedListener.unsubscribe();
+    mousePressedListener.unsubscribe();
+    mouseDraggedListener.unsubscribe();
+    mouseReleasedListener.unsubscribe();
 }
 
 void ofxQuadWarp::enableKeyboardShortcuts() {
-    if(bKeyboardShortcuts == true) {
-        return;
-    }
     bKeyboardShortcuts = true;
-    ofAddListener(ofEvents().keyPressed, this, &ofxQuadWarp::keyPressed);
+    keyPressedListener = ofEvents().keyPressed.newListener(this, &ofxQuadWarp::keyPressed);
 }
 
 void ofxQuadWarp::disableKeyboardShortcuts() {
-    if(bKeyboardShortcuts == false) {
-        return;
-    }
     bKeyboardShortcuts = false;
-    try {
-        ofRemoveListener(ofEvents().keyPressed, this, &ofxQuadWarp::keyPressed);
-    }
-    catch(Poco::SystemException) {
-        return;
-    }
+    keyPressedListener.unsubscribe();
 }
 
 //----------------------------------------------------- source / target points.
-void ofxQuadWarp::setSourceRect(const ofRectangle& r) {
+void ofxQuadWarp::setSourceRect(const ofRectangle& r)
+{
 	srcPoints[0].set(r.x, r.y);
 	srcPoints[1].set(r.x + r.width, r.y);
 	srcPoints[2].set(r.x + r.width, r.y + r.height);
 	srcPoints[3].set(r.x, r.y + r.height);
 }
 
-void ofxQuadWarp::setSourcePoints(const vector<ofPoint>& points) {
-    int t = MIN(4, points.size());
-    for(int i=0; i<t; i++) {
+void ofxQuadWarp::setSourcePoints(const vector<ofPoint>& points)
+{
+    for(std::size_t i = 0; i < std::min(std::size_t(4), points.size()); ++i)
         srcPoints[i].set(points[i]);
-    }
 }
 
-ofPoint* ofxQuadWarp::getSourcePoints() {
+ofPoint* ofxQuadWarp::getSourcePoints()
+{
     return &srcPoints[0];
 }
 
-void ofxQuadWarp::setTargetRect(const ofRectangle& r) {
+
+void ofxQuadWarp::setTargetRect(const ofRectangle& r)
+{
 	dstPoints[0].set(r.x, r.y);
 	dstPoints[1].set(r.x + r.width, r.y);
 	dstPoints[2].set(r.x + r.width, r.y + r.height);
 	dstPoints[3].set(r.x, r.y + r.height);
 }
 
-void ofxQuadWarp::setTargetPoints(const vector<ofPoint>& points) {
-    int t = MIN(4, points.size());
-    for(int i=0; i<t; i++) {
+void ofxQuadWarp::setTargetPoints(const vector<ofPoint>& points)
+{
+    for(std::size_t i = 0; i < std::min(std::size_t(4), points.size()); ++i)
         dstPoints[i].set(points[i]);
-    }
 }
 
-ofPoint* ofxQuadWarp::getTargetPoints() {
+ofPoint* ofxQuadWarp::getTargetPoints()
+{
     return &dstPoints[0];
 }
 
 //----------------------------------------------------- matrix.
-ofMatrix4x4 ofxQuadWarp::getMatrix() const {
+ofMatrix4x4 ofxQuadWarp::getMatrix() const
+{
     return getMatrix(&srcPoints[0], &dstPoints[0]);
 }
 
-ofMatrix4x4 ofxQuadWarp::getMatrixInverse() const {
+ofMatrix4x4 ofxQuadWarp::getMatrixInverse() const
+{
     return getMatrix(&dstPoints[0], &srcPoints[0]);
 }
 
-ofMatrix4x4 ofxQuadWarp::getMatrix(const ofPoint* srcPoints, const ofPoint* dstPoints) const {
+ofMatrix4x4 ofxQuadWarp::getMatrix(const ofPoint* srcPoints,
+                                   const ofPoint* dstPoints) const
+{
     
 	//we need our points as opencv points
 	//be nice to do this without opencv?
@@ -261,57 +244,70 @@ void ofxQuadWarp::update() {
     //
 }
 
-void ofxQuadWarp::reset() {
+void ofxQuadWarp::reset()
+{
     dstPoints[0].set(srcPoints[0]);
     dstPoints[1].set(srcPoints[1]);
     dstPoints[2].set(srcPoints[2]);
     dstPoints[3].set(srcPoints[3]);
 }
 
-//----------------------------------------------------- interaction.
-void ofxQuadWarp::onMouseMoved(ofMouseEventArgs& mouseArgs) {
-    if(bShow == false) {
+
+void ofxQuadWarp::onMouseMoved(ofMouseEventArgs& mouseArgs)
+{
+    if (bShow == false)
+    {
         return;
     }
     
     ofPoint mousePoint(mouseArgs.x, mouseArgs.y);
+
     mousePoint -= position;
-	for(int i=0; i<4; i++) {
+
+    for (std::size_t i=0; i < 4; ++i)
+    {
         ofPoint & dstPoint = dstPoints[i];
-		if(mousePoint.distance(dstPoint) <= anchorSizeHalf) {
+		if (mousePoint.distance(dstPoint) <= anchorSizeHalf)
+        {
             highlightCornerIndex = i;
             return;
 		}
 	}
+
     highlightCornerIndex = -1;
 }
 
-void ofxQuadWarp::onMousePressed(ofMouseEventArgs& mouseArgs) {
-    if(bShow == false) {
+
+void ofxQuadWarp::onMousePressed(ofMouseEventArgs& mouseArgs)
+{
+    if (bShow == false)
+    {
         return;
     }
     
     ofPoint mousePoint(mouseArgs.x, mouseArgs.y);
     mousePoint -= position;
-	for(int i=0; i<4; i++) {
-        ofPoint & dstPoint = dstPoints[i];
-		if(mousePoint.distance(dstPoint) <= anchorSizeHalf) {
+
+    for (std::size_t i = 0; i<4; i++)
+    {
+        ofPoint& dstPoint = dstPoints[i];
+
+        if (mousePoint.distance(dstPoint) <= anchorSizeHalf)
+        {
 			dstPoint.set(mousePoint);
             selectedCornerIndex = i;
             return;
 		}
 	}
+    
     selectedCornerIndex = -1;
 }
 
-void ofxQuadWarp::onMouseDragged(ofMouseEventArgs& mouseArgs) {
-    if(bShow == false) {
-        return;
-    }
-    if(selectedCornerIndex < 0 || selectedCornerIndex > 3) {
-        return;
-    }
-    
+void ofxQuadWarp::onMouseDragged(ofMouseEventArgs& mouseArgs)
+{
+    if  (bShow == false) return;
+    if (selectedCornerIndex < 0 || selectedCornerIndex > 3) return ;
+
     ofPoint mousePoint(mouseArgs.x, mouseArgs.y);
     mousePoint -= position;
 	dstPoints[selectedCornerIndex].set(mousePoint);
